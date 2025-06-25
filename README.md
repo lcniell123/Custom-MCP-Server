@@ -1,4 +1,4 @@
-# MCP Filesystem Assistant
+# MCP Filesystem Localized Server Connect
 
 This is a local AI assistant built using the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/servers), OpenAI's GPT-4o, and a filesystem server. It allows you to query and analyze files stored locally through a command-line chatbot.
 
