@@ -2,6 +2,9 @@
 
 This is a local AI assistant built using the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/servers), OpenAI's GPT-4o, and a filesystem server. It allows you to query and analyze files stored locally through a command-line chatbot.
 
+<img width="726" alt="Screenshot 2025-06-25 at 4 41 32 PM" src="https://github.com/user-attachments/assets/610e074e-aecc-4281-97c5-360ad84d0546" />
+
+
 ## Features
 
 - Ask questions about files in your local `/workspace` directory
