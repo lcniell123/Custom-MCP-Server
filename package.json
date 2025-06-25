@@ -1,0 +1,12 @@
+
+{  
+  "type":"module",
+  "dependencies": {
+    "@modelcontextprotocol/server-filesystem": "2025.3.28",
+    "cors": "2.8.5",
+    "dotenv": "16.5.0",
+    "express": "5.1.0",
+    "node-fetch": "3.3.2",
+    "openai": "5.7.0"
+  }
+}
