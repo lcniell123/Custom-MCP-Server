@@ -1,5 +1,4 @@
 // tools/filesystem/server.js
-
 import express from "express";
 import cors from "cors";
 import fs from "fs";
@@ -38,7 +37,6 @@ app.get("/read", (req, res) => {
   const requestedPath = req.query.path || "";
   const filePath = path.resolve(workspaceDir, requestedPath);
 
-  // Normalize both paths for security check
   const relative = path.relative(workspaceDir, filePath);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
     return res.status(403).json({ error: "Unauthorized path" });
