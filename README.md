@@ -1,21 +1,56 @@
-# MCP Filesystem Assistant
+# MCP Filesystem Assistant with Web UI
 
-This is a local AI assistant built using the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/servers), OpenAI's GPT-4o, and a filesystem server. It allows you to query and analyze files stored locally through a command-line chatbot.
+This project is a local AI assistant built using:
 
-## Features
+- [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/servers)
+- OpenAI GPT-4o
+- An MCP-compatible filesystem server
+- A React web frontend
 
-- Ask questions about files in your local `/workspace` directory
-- Automatically invokes tools to list or read files
-- Persistent memory within a single session
-- Character analysis and content summaries using GPT
-- Expandable to support databases, Azure, Kubernetes, or web interfaces
+It allows you to query and analyze files stored locally via a chat interface.
 
-## Prerequisites
+---
+
+## ✨ Features
+
+✅ Ask questions about files in `/workspace`  
+✅ Automatically read file contents with GPT analysis  
+✅ Web-based chat interface  
+✅ Modular backend architecture  
+✅ Expandable to Azure, Kubernetes, and more
+
+---
+
+## 📂 Project Structure
+
+```
+Custom-MCP-Server/
+├── agent/                  # Node agent (GPT + tools logic)
+│   └── index.js
+├── tools/
+│   └── filesystem/
+│       └── server.js       # MCP-compatible Filesystem Server
+├── workspace/              # Files you want the agent to access
+│   └── test.txt
+├── web/                    # React frontend
+│   └── src/
+│       └── components/
+│           └── ChatInterface.js
+├── server.js               # Express backend exposing /chat
+├── .env
+├── package.json
+```
+
+---
+
+## ⚙️ Prerequisites
 
 - Node.js v18+
-- A valid OpenAI API key
+- An OpenAI API key
 
-## Installation
+---
+
+## 🛠 Installation
 
 1. Clone the repository:
 
@@ -24,77 +59,86 @@ This is a local AI assistant built using the [Model Context Protocol (MCP)](http
    cd mcp-assistant
    ```
 
-2. Install dependencies:
+2. Install dependencies (root):
 
    ```bash
    npm install
    ```
 
-3. Create a `.env` file in the root directory:
+3. Install dependencies (frontend):
+
+   ```bash
+   cd web
+   npm install
+   ```
+
+4. Create a `.env` file in the root:
 
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
    MCP_FILESYSTEM_URL=http://localhost:4001
-   FILESYSTEM_PORT=4001
-   FS_DIR=./workspace
    ```
 
-4. Create the `/workspace` folder and add test files (e.g., `test.txt`):
+---
 
-   ```bash
-   mkdir workspace
-   echo "hellohello" > workspace/test.txt
-   ```
+## 🚀 Running the App
 
-## Running the Assistant
+Open **3 terminals**:
 
-1. Start the filesystem server:
+**Terminal 1 – MCP Filesystem Server**
 
-   ```bash
-   node tools/filesystem/server.js
-   ```
-
-2. In a separate terminal, start the agent:
-
-   ```bash
-   node agent/index.js
-   ```
-
-3. Begin chatting:
-
-   ```
-   You: list all files
-   You: read test.txt
-   You: how many characters?
-   You: what is the most used letter?
-   ```
-
-## Project Structure
-
-```
-.
-├── agent
-│   └── index.js         # Chat agent CLI using OpenAI + MCP tools
-├── tools
-│   └── filesystem
-│       └── server.js    # MCP-compatible local file server
-├── workspace            # Local files you want the agent to read
-├── .env
-└── README.md
+```bash
+cd tools/filesystem
+node server.js
 ```
 
-## Known Issues
+**Terminal 2 – Express Backend**
 
-- Files outside the `workspace` folder are blocked for security
-- Tool use is limited to reading and listing for now
-- Memory is session-based only (not persistent across restarts)
+```bash
+cd Custom-MCP-Server
+node server.js
+```
 
-## Next Steps
+**Terminal 3 – React Frontend**
 
-- Add support for CSV and tabular file summarization
-- Build a web-based interface
-- Integrate Azure Blob Storage and Kubernetes for multi-user expansion
+```bash
+cd web
+npm start
+```
+
+Frontend: [http://localhost:3000](http://localhost:3000)  
+Backend: [http://localhost:4000](http://localhost:4000)
+
+---
+
+## 🧠 How It Works
+
+1. You ask a question in the web chat.
+2. The backend (`server.js`) calls `runPrompt()`.
+3. GPT determines if it needs to call a tool (`read_file` or `list_files`).
+4. The backend performs the tool call and feeds results back into GPT.
+5. GPT returns the final answer.
+6. The frontend displays it.
+
+---
+
+## 💡 Tips
+
+- Ensure all files you want to query are inside `/workspace`.
+- Use `setupProxy.js` or a full URL (`http://localhost:4000/chat`) in `fetch()` to avoid proxy issues.
+- Persist conversation history (`messages[]`) if you want contextual memory.
+
+---
+
+## ✅ Next Steps
+
+- Add authentication
+- Persist chat history
+- Deploy to Azure or Kubernetes
+- Support CSV and tabular analysis
+
+---
 
 ## License
 
-MIT License. Use at your own risk.
+MIT License
