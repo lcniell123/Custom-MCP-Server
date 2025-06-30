@@ -1,5 +1,7 @@
 # MCP Filesystem Assistant with Web UI
 
+<img width="1439" alt="Screenshot 2025-06-30 at 1 41 19 PM" src="https://github.com/user-attachments/assets/3cf5c769-ccbd-48dc-9e5e-ea186cd7590d" />
+
 This project is a local AI assistant that lets you:
 
 ✅ Query and analyze files stored in `/workspace`  
