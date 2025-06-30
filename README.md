@@ -9,17 +9,17 @@ This project is a local AI assistant that lets you:
 
 ---
 
-## ✨ Features
+## Features
 
-- 📂 List and delete files in your workspace
-- 📝 Upload files via a drag-and-drop UI
-- 💬 Chat with GPT-4o about file contents
-- ⚡ Clean, mobile-friendly frontend
-- 🔐 (Optional) Add authentication for security
+- List and delete files in your workspace
+- Upload files via a drag-and-drop UI
+- Chat with GPT-4o about file contents
+- Clean, mobile-friendly frontend
+- (Optional) Add authentication for security
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 Custom-MCP-Server/
@@ -41,14 +41,14 @@ Custom-MCP-Server/
 
 ---
 
-## ⚙️ Prerequisites
+## Prerequisites
 
 - Node.js v18+
 - An OpenAI API key
 
 ---
 
-## 🛠 Installation
+## Installation
 
 1. Clone the repository:
 
@@ -79,7 +79,7 @@ Custom-MCP-Server/
 
 ---
 
-## 🚀 Running the App
+## Running the App
 
 Open **3 terminals**:
 
@@ -109,7 +109,7 @@ Filesystem API: [http://localhost:4001](http://localhost:4001)
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 1. You ask a question in the web chat.
 2. The backend (`server.js`) calls GPT-4o with tool definitions.
@@ -123,7 +123,7 @@ Filesystem API: [http://localhost:4001](http://localhost:4001)
 
 ---
 
-## 🖼 Web UI Overview
+## Web UI Overview
 
 - Clean, responsive chat interface
 - Upload files into `/workspace`
@@ -132,7 +132,7 @@ Filesystem API: [http://localhost:4001](http://localhost:4001)
 
 ---
 
-## 💡 Tips
+## Tips
 
 - All files must be in `/workspace` to be accessible.
 - To avoid CORS issues, always start all servers and use the correct ports.
