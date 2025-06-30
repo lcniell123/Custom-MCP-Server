@@ -1,23 +1,21 @@
 # MCP Filesystem Assistant with Web UI
 
-This project is a local AI assistant built using:
+This project is a local AI assistant that lets you:
 
-- [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/servers)
-- OpenAI GPT-4o
-- An MCP-compatible filesystem server
-- A React web frontend
-
-It allows you to query and analyze files stored locally via a chat interface.
+✅ Query and analyze files stored in `/workspace`  
+✅ Upload and delete files via a modern web interface  
+✅ Use GPT-4o to summarize or answer questions about your files  
+✅ Easily extend to Azure, Kubernetes, or more secure setups
 
 ---
 
 ## ✨ Features
 
-✅ Ask questions about files in `/workspace`  
-✅ Automatically read file contents with GPT analysis  
-✅ Web-based chat interface  
-✅ Modular backend architecture  
-✅ Expandable to Azure, Kubernetes, and more
+- 📂 List and delete files in your workspace
+- 📝 Upload files via a drag-and-drop UI
+- 💬 Chat with GPT-4o about file contents
+- ⚡ Clean, mobile-friendly frontend
+- 🔐 (Optional) Add authentication for security
 
 ---
 
@@ -30,13 +28,13 @@ Custom-MCP-Server/
 ├── tools/
 │   └── filesystem/
 │       └── server.js       # MCP-compatible Filesystem Server
-├── workspace/              # Files you want the agent to access
+├── workspace/              # Files you want the assistant to access
 │   └── test.txt
 ├── web/                    # React frontend
 │   └── src/
 │       └── components/
 │           └── ChatInterface.js
-├── server.js               # Express backend exposing /chat
+├── server.js               # Express backend exposing /chat and /upload
 ├── .env
 ├── package.json
 ```
@@ -65,7 +63,7 @@ Custom-MCP-Server/
    npm install
    ```
 
-3. Install dependencies (frontend):
+3. Install frontend dependencies:
 
    ```bash
    cd web
@@ -95,7 +93,6 @@ node server.js
 **Terminal 2 – Express Backend**
 
 ```bash
-cd Custom-MCP-Server
 node server.js
 ```
 
@@ -107,35 +104,48 @@ npm start
 ```
 
 Frontend: [http://localhost:3000](http://localhost:3000)  
-Backend: [http://localhost:4000](http://localhost:4000)
+Backend API: [http://localhost:4000](http://localhost:4000)  
+Filesystem API: [http://localhost:4001](http://localhost:4001)
 
 ---
 
 ## 🧠 How It Works
 
 1. You ask a question in the web chat.
-2. The backend (`server.js`) calls `runPrompt()`.
-3. GPT determines if it needs to call a tool (`read_file` or `list_files`).
-4. The backend performs the tool call and feeds results back into GPT.
-5. GPT returns the final answer.
-6. The frontend displays it.
+2. The backend (`server.js`) calls GPT-4o with tool definitions.
+3. GPT either:
+   - Replies directly, or
+   - Calls tools (`read_file`, `list_files`) via MCP.
+4. If a tool call is needed, the backend:
+   - Requests file content or file list from the filesystem server.
+   - Sends the result back into GPT for a final answer.
+5. The frontend displays GPT's reply.
+
+---
+
+## 🖼 Web UI Overview
+
+- Clean, responsive chat interface
+- Upload files into `/workspace`
+- List and delete workspace files inline
+- Works great on desktop & mobile
 
 ---
 
 ## 💡 Tips
 
-- Ensure all files you want to query are inside `/workspace`.
-- Use `setupProxy.js` or a full URL (`http://localhost:4000/chat`) in `fetch()` to avoid proxy issues.
-- Persist conversation history (`messages[]`) if you want contextual memory.
+- All files must be in `/workspace` to be accessible.
+- To avoid CORS issues, always start all servers and use the correct ports.
+- You can customize styles with Tailwind CSS or your own CSS.
 
 ---
 
 ## ✅ Next Steps
 
-- Add authentication
-- Persist chat history
-- Deploy to Azure or Kubernetes
-- Support CSV and tabular analysis
+- Add authentication with API keys or sessions.
+- Deploy to Azure or Kubernetes.
+- Extend tool capabilities (e.g., CSV analysis).
+- Persist chat history.
 
 ---
 
