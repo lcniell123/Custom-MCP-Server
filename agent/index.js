@@ -1,6 +1,5 @@
 // agent/index.js
 
-import readline from "readline";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import OpenAI from "openai";
@@ -42,15 +41,6 @@ const tools = [
   },
 ];
 
-// 🧠 Memory: stores full conversation
-const messages = [
-  {
-    role: "system",
-    content:
-      "You are a helpful assistant that uses tools to interact with local files. If given a file's content, analyze it in detail.",
-  },
-];
-
 async function callFilesystemTool(toolCall) {
   const url = process.env.MCP_FILESYSTEM_URL || "http://localhost:4001";
   const { name, arguments: argsJSON } = toolCall.function;
@@ -68,7 +58,7 @@ async function callFilesystemTool(toolCall) {
         `${url}/read?path=${encodeURIComponent(args.path)}`
       );
       const json = await res.json();
-      return JSON.stringify(json);
+      return json.content || JSON.stringify(json);
     }
 
     return JSON.stringify({ error: "Unknown tool call" });
@@ -77,65 +67,67 @@ async function callFilesystemTool(toolCall) {
   }
 }
 
-async function runAgent() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: "You: ",
+export async function runPrompt(chatMessages = []) {
+  const messages = [
+    {
+      role: "system",
+      content:
+        "You are a helpful assistant that can read and analyze local files when needed.",
+    },
+    ...chatMessages
+      .filter(
+        (m) =>
+          m.role && typeof m.content === "string" && m.content.trim() !== ""
+      )
+      .map((m) => ({
+        role: m.role,
+        content: m.content,
+        tool_calls: m.tool_calls,
+        name: m.name,
+        tool_call_id: m.tool_call_id,
+      })),
+  ];
+
+  const initial = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    tools,
+    tool_choice: "auto",
   });
 
-  console.log("💬 Ask me about the files in /workspace. Type `exit` to quit.");
-  rl.prompt();
+  const response = initial.choices[0].message;
 
-  rl.on("line", async (input) => {
-    if (input.trim().toLowerCase() === "exit") {
-      rl.close();
-      return;
-    }
-
-    try {
-      messages.push({ role: "user", content: input });
-
-      const initial = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages,
-        tools,
-        tool_choice: "auto",
-      });
-
-      const response = initial.choices[0].message;
-      messages.push({ role: "assistant", ...response });
-
-      if (response.tool_calls && response.tool_calls.length > 0) {
-        const toolCall = response.tool_calls[0];
-        const toolResult = await callFilesystemTool(toolCall);
-
-        console.log("📦 Tool result:", toolResult); // optional: remove for production
-
-        messages.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: toolResult,
-        });
-
-        const followUp = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages,
-        });
-
-        const finalResponse = followUp.choices[0].message;
-        messages.push({ role: "assistant", ...finalResponse });
-
-        console.log(`🤖 ${finalResponse.content}`);
-      } else {
-        console.log(`🤖 ${response.content}`);
-      }
-    } catch (err) {
-      console.error("❌ Error:", err.message);
-    }
-
-    rl.prompt();
+  messages.push({
+    role: "assistant",
+    content: response.content ?? null,
+    tool_calls: response.tool_calls ?? undefined,
   });
+
+  if (response.tool_calls && response.tool_calls.length > 0) {
+    const toolCall = response.tool_calls[0];
+    const toolResult = await callFilesystemTool(toolCall);
+
+    messages.push({
+      role: "tool",
+      tool_call_id: toolCall.id,
+      content: toolResult,
+    });
+
+    const followUp = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages,
+    });
+
+    const finalResponse = followUp.choices[0].message;
+
+    return {
+      content: finalResponse.content,
+      rawMessage: finalResponse,
+    };
+  }
+
+  return {
+    content: response.content,
+    rawMessage: response,
+  };
 }
-
-runAgent();
