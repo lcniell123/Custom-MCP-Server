@@ -11,6 +11,9 @@ This project is a local AI assistant that lets you:
 
 ---
 
+<img width="726" alt="Screenshot 2025-06-25 at 4 41 32 PM" src="https://github.com/user-attachments/assets/610e074e-aecc-4281-97c5-360ad84d0546" />
+
+
 ## Features
 
 - List and delete files in your workspace
