@@ -7,8 +7,16 @@ const {
 } = require("@azure/storage-blob");
 
 module.exports = async function (context, req) {
-  const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+  const connectionString = process.env.AzureWebJobsStorage;
   const containerName = process.env.AZURE_BLOB_CONTAINER_NAME;
+
+  if (!connectionString) {
+    context.res = {
+      status: 500,
+      body: "AzureWebJobsStorage is not set.",
+    };
+    return;
+  }
 
   if (!req.query || !req.query.filename) {
     context.res = {
@@ -22,15 +30,12 @@ module.exports = async function (context, req) {
     BlobServiceClient.fromConnectionString(connectionString);
   const containerClient = blobServiceClient.getContainerClient(containerName);
 
-  // TEMP: hardcode userId (replace with auth later)
   const userId = "testuser";
   const blobName = `${userId}/${req.query.filename}`;
   const blobClient = containerClient.getBlobClient(blobName);
 
-  // Generate a SAS URL (valid for 10 minutes)
   const expiry = new Date(new Date().valueOf() + 10 * 60 * 1000);
 
-  // You need the account name and key separately to generate SAS
   const parsed = /AccountName=([^;]+);AccountKey=([^;]+)/.exec(
     connectionString
   );

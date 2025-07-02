@@ -1,8 +1,17 @@
 const { BlobServiceClient } = require("@azure/storage-blob");
+const { deleteMetadata } = require("../shared/storage");
 
 module.exports = async function (context, req) {
-  const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+  const connectionString = process.env.AzureWebJobsStorage;
   const containerName = process.env.AZURE_BLOB_CONTAINER_NAME;
+
+  if (!connectionString) {
+    context.res = {
+      status: 500,
+      body: "AzureWebJobsStorage is not set.",
+    };
+    return;
+  }
 
   if (!req.query || !req.query.filename) {
     context.res = {
@@ -16,16 +25,17 @@ module.exports = async function (context, req) {
     BlobServiceClient.fromConnectionString(connectionString);
   const containerClient = blobServiceClient.getContainerClient(containerName);
 
-  // TEMP: Hardcode userId (you'll replace with auth later)
   const userId = "testuser";
   const blobName = `${userId}/${req.query.filename}`;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
   try {
     await blockBlobClient.deleteIfExists();
+    await deleteMetadata(userId, req.query.filename);
+
     context.res = {
       status: 200,
-      body: `Deleted file: ${blobName}`,
+      body: `Deleted file and metadata for: ${blobName}`,
     };
   } catch (err) {
     context.res = {
