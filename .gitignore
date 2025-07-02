@@ -13,3 +13,4 @@ coverage
 *.env.test
 *.env.production
 *.env.local     
+backend/local.settings.json
