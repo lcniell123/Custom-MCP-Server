@@ -1,46 +1,37 @@
-# MCP Filesystem Assistant with Web UI
+# MCP Filesystem Assistant – Azure Functions Backend
 
-<img width="1439" alt="Screenshot 2025-06-30 at 1 41 19 PM" src="https://github.com/user-attachments/assets/3cf5c769-ccbd-48dc-9e5e-ea186cd7590d" />
-
-This project is a local AI assistant that lets you:
-
-✅ Query and analyze files stored in `/workspace`  
-✅ Upload and delete files via a modern web interface  
-✅ Use GPT-4o to summarize or answer questions about your files  
-✅ Easily extend to Azure, Kubernetes, or more secure setups
+This project is an AI-powered file assistant with an Azure serverless backend.  
+It supports secure per-user storage and retrieval of files, ready for integration with a React frontend.
 
 ---
 
-
-
 ## Features
 
-- List and delete files in your workspace
-- Upload files via a drag-and-drop UI
-- Chat with GPT-4o about file contents
-- Clean, mobile-friendly frontend
-- (Optional) Add authentication for security
+✅ Upload files to Azure Blob Storage  
+✅ List files stored for each user  
+✅ Download files via secure SAS URLs  
+✅ Delete files and metadata  
+✅ Per-user data isolation (`userId` folders and PartitionKeys)  
+✅ Fallback `testuser` mode for local/Postman testing  
+✅ Ready for React frontend with MSAL authentication
 
 ---
 
 ## Project Structure
 
 ```
-Custom-MCP-Server/
-├── agent/                  # Node agent (GPT + tools logic)
-│   └── index.js
-├── tools/
-│   └── filesystem/
-│       └── server.js       # MCP-compatible Filesystem Server
-├── workspace/              # Files you want the assistant to access
-│   └── test.txt
-├── web/                    # React frontend
-│   └── src/
-│       └── components/
-│           └── ChatInterface.js
-├── server.js               # Express backend exposing /chat and /upload
-├── .env
-├── package.json
+backend/
+├── Upload/
+│   └── index.js         # Upload file endpoint
+├── Download/
+│   └── index.js         # Generate SAS URL
+├── Delete/
+│   └── index.js         # Delete file and metadata
+├── List/
+│   └── index.js         # List metadata
+├── shared/
+│   ├── auth.js          # Parses user claims (oid/sub)
+│   └── storage.js       # Table Storage helpers
 ```
 
 ---
@@ -48,108 +39,87 @@ Custom-MCP-Server/
 ## Prerequisites
 
 - Node.js v18+
-- An OpenAI API key
+- Azure Subscription
+- Azure Function App deployed with:
+  - Blob Storage container (`userfiles`)
+  - Table Storage table (`FileMetadata`)
+- App Registration in Azure AD (for authentication)
 
 ---
 
-## Installation
+## Installation & Deployment
 
-1. Clone the repository:
+1. Clone this repo.
 
-   ```bash
-   git clone https://github.com/your-username/mcp-assistant
-   cd mcp-assistant
-   ```
-
-2. Install dependencies (root):
+2. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Install frontend dependencies:
+3. Create the following Application Settings in Azure:
 
-   ```bash
-   cd web
-   npm install
-   ```
+   - `AzureWebJobsStorage`
+   - `AZURE_BLOB_CONTAINER_NAME`
+   - `AZURE_TABLE_NAME`
 
-4. Create a `.env` file in the root:
-
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   MCP_FILESYSTEM_URL=http://localhost:4001
-   ```
+4. Deploy to Azure Functions (e.g., using VS Code Azure Functions extension).
 
 ---
 
-## Running the App
+## Testing with Postman
 
-Open **3 terminals**:
+✅ All endpoints can be tested without authentication using fallback `testuser` mode:
 
-**Terminal 1 – MCP Filesystem Server**
-
-```bash
-cd tools/filesystem
-node server.js
+```
+POST   /api/Upload
+GET    /api/List
+GET    /api/Download?filename=<name>
+GET    /api/Delete?filename=<name>
 ```
 
-**Terminal 2 – Express Backend**
+**Fallback Logic:**
+If no valid claims are detected:
 
-```bash
-node server.js
+```
+const userId = "testuser";
 ```
 
-**Terminal 3 – React Frontend**
-
-```bash
-cd web
-npm start
-```
-
-Frontend: [http://localhost:3000](http://localhost:3000)  
-Backend API: [http://localhost:4000](http://localhost:4000)  
-Filesystem API: [http://localhost:4001](http://localhost:4001)
+This allows you to test without needing tokens.
 
 ---
 
 ## How It Works
 
-1. You ask a question in the web chat.
-2. The backend (`server.js`) calls GPT-4o with tool definitions.
-3. GPT either:
-   - Replies directly, or
-   - Calls tools (`read_file`, `list_files`) via MCP.
-4. If a tool call is needed, the backend:
-   - Requests file content or file list from the filesystem server.
-   - Sends the result back into GPT for a final answer.
-5. The frontend displays GPT's reply.
+- Files are stored in:
+  ```
+  userfiles/<userId>/<filename>
+  ```
+- Metadata stored in Table Storage with:
+  ```
+  PartitionKey = <userId>
+  RowKey = <filename>
+  ```
+- When your frontend is ready and you authenticate users via Azure AD:
+  - The `getUserFromHeaders()` function will parse `x-ms-client-principal`.
+  - Files will be isolated per user automatically.
 
 ---
 
-## Web UI Overview
+## Next Steps
 
-- Clean, responsive chat interface
-- Upload files into `/workspace`
-- List and delete workspace files inline
-- Works great on desktop & mobile
+✅ Build React frontend (Phase 1.6)
 
----
+- Add MSAL.js login flow
+- Display per-user file lists
+- Integrate Upload/Download/Delete UI
 
-## Tips
+✅ Re-enable authentication in Azure Portal before production:
 
-- All files must be in `/workspace` to be accessible.
-- To avoid CORS issues, always start all servers and use the correct ports.
-- You can customize styles with Tailwind CSS or your own CSS.
+- Turn "Require Authentication" back on
+- Remove fallback `testuser` logic if desired
 
----
-
-## ✅ Next Steps
-
-- Add authentication with API keys or sessions.
-- Deploy to Azure or Kubernetes.
-- Extend tool capabilities (e.g., CSV analysis).
-- Persist chat history.
+✅ Add Application Insights for monitoring
 
 ---
 

@@ -5,6 +5,7 @@ const {
   SASProtocol,
   StorageSharedKeyCredential,
 } = require("@azure/storage-blob");
+const { getUserFromHeaders } = require("../shared/auth");
 
 module.exports = async function (context, req) {
   const connectionString = process.env.AzureWebJobsStorage;
@@ -30,7 +31,15 @@ module.exports = async function (context, req) {
     BlobServiceClient.fromConnectionString(connectionString);
   const containerClient = blobServiceClient.getContainerClient(containerName);
 
-  const userId = "testuser";
+  let userId, email;
+  try {
+    ({ userId, email } = getUserFromHeaders(req));
+  } catch (err) {
+    console.log("Claims missing—using testuser fallback");
+    userId = "testuser";
+    email = "test@example.com";
+  }
+
   const blobName = `${userId}/${req.query.filename}`;
   const blobClient = containerClient.getBlobClient(blobName);
 
