@@ -2,7 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "dependencies": {
+    "@azure/data-tables": "^13.0.0",
     "@azure/storage-blob": "^12.10.0",
-    "@azure/data-tables": "^13.0.0"
+    "express-session": "1.18.1",
+    "passport": "0.7.0",
+    "passport-azure-ad": "4.3.5"
   }
 }
